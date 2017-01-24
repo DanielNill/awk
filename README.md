@@ -1,8 +1,6 @@
 # Awk
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/awk`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+An implementation of the basic operations of the awk language written in ruby
 
 ## Installation
 
@@ -22,7 +20,37 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+create a new instance to evaluate a file
+`awk = Awk::Awk.new('path/file_name.txt')`
+
+create a new instance to evaluate a string
+`awk = Awk::Awk.new('some string')`
+
+an evaluation instance consists of a pattern and an action
+`awk.pattern { |col| col[1] > 3 }.action { |col| puts "#{col[2]} is great!" }`
+
+an evaluation instance is executed with `.perform`
+```
+awk.pattern { |p| p[1] > 3 }.action { |p| puts "#{p[2]} is great!" }
+ .pattern { |p| p[1] < 3 }.action { |p| puts "#{p[2]} is too bad!" }
+ .perform
+```
+
+common keywords are avialable on the proc scope for pattern and action
+`begin`, `end`, `nr`, and `nf`
+```
+awk.pattern { |p| p.end }.action { |p| puts "this happens at the end of the evaluation" }
+awk.pattern { |p| p.begin }.action { |p| puts "this happens at the beginning of the evaluation" }
+awk.pattern { |p| true }.action { |p| puts "#{p.nr} lines read so far" }
+awk.pattern { |p| true }.action { |p| puts "#{p.nf} fields in this row" }
+```
+
+an action method given without a pattern method will assume the pattern is true
+`awk.action { |p| puts "this will be printed for every row" }`
+
+but a pattern given without a cooresponding action will be ignored
+`awk.pattern { |p| p[1] > 2 }.pattern { |p| p[1] < 2 }.action { |p| "#{p[1]} is less than 2" }`
+
 
 ## Development
 
@@ -32,7 +60,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/awk.
+Bug reports and pull requests are welcome on GitHub at https://github.com/DanielNill/awk.
 
 
 ## License
