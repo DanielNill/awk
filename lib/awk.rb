@@ -1,4 +1,5 @@
 require "awk/version"
+require "active_support/all"
 
 module Awk
   class Awk
@@ -20,7 +21,7 @@ module Awk
     end
 
     def action(&block)
-      if @pairs.last[:pattern].present? && @pairs.last[:action].blank?
+      if @pairs.last.present? && @pairs.last[:pattern].present? && @pairs.last[:action].blank?
         @pairs.last[:action] = yield @data
       else
         @pairs << { pattern: true, action: yield(@data) }
@@ -32,14 +33,28 @@ module Awk
     def perform
       @pairs.each do |pair|
         puts pair
-        # implement later
       end
     end
   end
 
   class Data
     def initialize(source)
+      raise "source must be a string" unless source.is_a?(String)
       @source = source
+    end
+
+    def parse
+      @parsed_data ||= if Pathname.new(@source).exists?
+                         parse_file
+                       else
+                         parse_string
+                       end
+    end
+
+    private
+
+    def parse_string
+      @source.split(/\s/)
     end
   end
 end
